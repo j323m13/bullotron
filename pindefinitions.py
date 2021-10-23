@@ -1,0 +1,15 @@
+SW1 = 21
+SW2 = 20
+SW3 = 16
+IN1 = 26
+IN2 = 19
+OUT1 = 5
+OUT2 = 6
+OUT3 = 13
+SERVO = 27
+LCD_RS = 4
+LCD_E = 17
+LCD_D4 = 18 
+LCD_D5 = 22
+LCD_D6 = 23
+LCD_D7 = 24

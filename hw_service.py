@@ -18,7 +18,8 @@ import sys
 
 # Libs
 from statemachine import StateMachine, State # State Machine
-from gpiozero import PWMOutputDevice 
+from gpiozero import PWMOutputDevice, Button, DigitalOutputDevice
+import redis
 
 # Own modules
 import pindefinitions as pin #Pins on the PCB
@@ -31,6 +32,24 @@ __maintainer__ = 'MajorTwip'
 __email__ = 'majortwip@gmail.com'
 __status__ = 'Draft'
 
+# Global Elements
+R = redis.Redis()
+
+'''
+FAN = PWMOutputDevice(pin.OUT1,False)
+SERVO = PWMOutputDevice(pin.SERVO,active_high=False,frequency=50)
+BTN = Button(pin.SW1)
+RC = Button(pin.IN1)
+RC_EN = DigitalOutputDevice(pin.OUT2,False)
+LEVELSENS = Button(pin.IN2)
+'''
+
+def setServo(level):
+    if 0<=level<=1000:
+        logging.debug("set servo to level " + str(level))
+        #SERVO.write(0.075+(level/10000))
+    else:
+        logging.warning("servo-level must be between 0 and 1000")
 
 class BullotronHW(StateMachine):
     init_hw = State('InitHW', initial=True)
@@ -51,7 +70,9 @@ class BullotronHW(StateMachine):
     def on_init(self):
         logging.info("Initialize Hardware")
         logging.debug("shut off fan")
+        #FAN.write(OFF)
         logging.debug("close lid")
+        setServo(R.get("lid_closed") or 0)
 
     def on_enter_closed(self):
         logging.info("closed")
@@ -67,6 +88,7 @@ class BullotronHW(StateMachine):
     def on_close(self):
         logging.info("Closing")
         logging.debug("shut off fan")
+
         logging.debug("close lid")
 
     def on_enter_open_to_blow(self):

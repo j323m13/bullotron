@@ -40,7 +40,7 @@ class BullotronHW(StateMachine):
 
     init = init_hw.to(closed)
     close = sens_fill.to(closed) | open_to_blow.to(closed) | open_full.to(closed) | open_setting.to(closed) 
-    sense = close.to(sens_fill)
+    sense = closed.to(sens_fill)
     blow_cycle = closed.to(open_to_blow) | open_to_blow.to(blowing) | blowing.to(closed)
     fill = closed.to(open_full)
     set_angle = closed.to(open_setting)

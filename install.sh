@@ -3,11 +3,10 @@
 
 #install packages
 sudo apt update
-sudo apt install python3 pip3 pigpio redis
-
+sudo apt install python3 python3-pip pigpio redis
 #start redis
-systemctl start redis
-systemctl enable redis
+sudo systemctl start redis-server
+sudo systemctl enable redis-server
 
 #install python libs
 pip3 install -r requirements.txt

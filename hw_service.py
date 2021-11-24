@@ -29,4 +29,19 @@ __email__ = 'majortwip@gmail.com'
 __status__ = 'Draft'
 
 
+class BullotronHW(StateMachine):
+    init_hw = State('InitHW', initial=True)
+    opening_full = State('Fully opening')
+    
+    start = on_debt.to(under_approval)
+    pause = under_approval.to(on_debt)
+    finish = under_approval.to(approved)
+    
+    reset = approved.to(on_debt) | under_approval.to(on_debt)
+    next_step = on_debt.to(under_approval) | under_approval.to(on_debt)
+    
+    def on_on_debt(self):
+        print('Document on hold.')
 
+        
+bullotron = BullotronHW()

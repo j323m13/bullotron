@@ -14,7 +14,6 @@ from argparse import ArgumentParser
 from time import sleep
 import os
 import sys
-# […]
 
 # Libs
 from statemachine import StateMachine, State # State Machine
@@ -35,21 +34,39 @@ __status__ = 'Draft'
 # Global Elements
 R = redis.Redis()
 
-'''
-FAN = PWMOutputDevice(pin.OUT1,False)
-SERVO = PWMOutputDevice(pin.SERVO,active_high=False,frequency=50)
+
+#FAN = PWMOutputDevice(pin.OUT1,False)
+#SERVO_PWM = PWMOutputDevice(pin.SERVO,active_high=False,frequency=50)
 BTN = Button(pin.SW1)
 RC = Button(pin.IN1)
 RC_EN = DigitalOutputDevice(pin.OUT2,False)
 LEVELSENS = Button(pin.IN2)
-'''
 
-def setServo(level):
-    if 0<=level<=1000:
-        logging.debug("set servo to level " + str(level))
-        #SERVO.write(0.075+(level/10000))
-    else:
-        logging.warning("servo-level must be between 0 and 1000")
+class Servo():
+    value = 0
+
+    def setServo(self, level):
+        if 0<=level<=1000:
+            logging.debug("set servo to level " + str(level))
+            self.value = level
+            #SERVO.value = 0.075+(level/10000)
+        else:
+            logging.warning("servo-level must be between 0 and 1000")
+
+    def getServo(self):
+        return self.value
+
+    def fadeServo(self,level):
+        while not level == self.value:
+            if level > self.value:
+                self.value +=1
+            else:
+                self.value -=1
+            self.setServo(self.value)
+            sleep(0.1)
+
+SERVO = Servo()
+
 
 class BullotronHW(StateMachine):
     init_hw = State('InitHW', initial=True)
@@ -70,46 +87,65 @@ class BullotronHW(StateMachine):
     def on_init(self):
         logging.info("Initialize Hardware")
         logging.debug("shut off fan")
-        #FAN.write(OFF)
+        #FAN.off()
         logging.debug("close lid")
-        setServo(int(R.get("lid_closed") or 0))
+        SERVO.setServo(int(R.get("lid_closed") or 0))
 
     def on_enter_closed(self):
         logging.info("closed")
         logging.debug("enable RC-receiver")
+        RC_EN.on()
         logging.debug("waiting for: RC, Buttonpress for start, order to fill, setup")
-        sleep(4)
-        self.blow_cycle()
+        while True:
+            if RC.is_pressed:
+                self.blow_cycle()
+                break
+            if BTN.is_pressed:
+                self.blow_cycle()
+                break
+            #TODO fill order
+            if int(R.get("lid_setuplevel") or -1) > 0:
+                self.set_angle()
+
 
     def on_exit_closed(self):
         logging.debug("disable RC-receiver")
-
+        RC_EN.off()
 
     def on_close(self):
         logging.info("Closing")
         logging.debug("shut off fan")
-
+        #FAN.off()
         logging.debug("close lid")
+        SERVO.fadeServo(int(R.get("lid_closed") or 0))
 
     def on_enter_open_to_blow(self):
         logging.info("Opening to blow")
         logging.debug("Set lid to")
-        sleep(2)
+        SERVO.fadeServo(int(R.get("lid_blowlevel") or 800))
         logging.debug("trigger blow")
         self.blow_cycle()
 
     def on_enter_blowing(self):
         logging.info("Blowing")
         logging.debug("Set fan to")
+        #FAN.value = (int(R.get("blowforce") or 5))
         logging.debug("Wait for")
-        sleep(2)
+        sleep(int(R.get("blowtime") or 5))
         self.blow_cycle()
-
 
     def on_exit_blowing(self):
         logging.debug("stop fan")
+        #FAN.off()
 
-
+    def on_open_setting(self):
+        logging.info("Set lid to ordered value")
+        level = int(R.get("lid_setuplevel") or -1)
+        while level > 0:
+            SERVO.fadeServo(level)
+            sleep(0.1)
+            level = int(R.get("lid_setuplevel") or -1)
+        self.close()
 
 def main():
     # set loglevel from CLI

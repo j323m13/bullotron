@@ -1,0 +1,10 @@
+[Unit]
+Description=Bullotron, Display-controlling service
+After=multi-user.target
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/python3 /opt/bullotron/display_service.py
+[Install]
+WantedBy=multi-user.target

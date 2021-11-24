@@ -48,7 +48,7 @@ def main():
     #juste pour montrer la simplicité de REDIS
     
     while True:
-      R.set("somekey", BTN1.is_pressed)
+      R.set("somekey", str(BTN1.is_pressed))
       sleep(1)
 
 if __name__ == '__main__':

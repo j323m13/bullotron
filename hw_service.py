@@ -72,7 +72,7 @@ class BullotronHW(StateMachine):
         logging.debug("shut off fan")
         #FAN.write(OFF)
         logging.debug("close lid")
-        setServo(R.get("lid_closed") or 0)
+        setServo(int(R.get("lid_closed") or 0))
 
     def on_enter_closed(self):
         logging.info("closed")

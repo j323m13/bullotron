@@ -15,9 +15,13 @@ from time import sleep
 import os
 import sys
 
+
+
 # Libs
 from statemachine import StateMachine, State # State Machine
-from gpiozero import PWMOutputDevice, Button, DigitalOutputDevice
+from gpiozero import Device, PWMOutputDevice, Button, DigitalOutputDevice
+from gpiozero.pins.pigpio import PiGPIOFactory
+Device.pin_factory = PiGPIOFactory() #Use PiGPIO
 import redis
 
 # Own modules
@@ -48,7 +52,7 @@ class InvertedServo(PWMOutputDevice):
         if 0<=level<=1000:
             logging.debug("set servo to level " + str(level) + " : " + str(0.075+(level/10000)))
             self.target = level
-            self.value = 0.075+(level/10000)
+            self.value = 0.025+(level/10000)
         else:
             logging.warning("servo-level must be between 0 and 1000")
 
@@ -59,7 +63,7 @@ class InvertedServo(PWMOutputDevice):
             else:
                 self.target -=1
             self.set(self.target)
-            sleep(0.03)
+            sleep(0.02)
 
 SERVO = InvertedServo(pin.SERVO,active_high=False,frequency=50)
 
@@ -104,6 +108,7 @@ class BullotronHW(StateMachine):
             #TODO fill order
             if int(R.get("lid_setuplevel") or -1) > 0:
                 self.set_angle()
+                break
             sleep(0.1)
 
 
@@ -137,7 +142,7 @@ class BullotronHW(StateMachine):
         logging.debug("stop fan")
         FAN.off()
 
-    def on_open_setting(self):
+    def on_enter_open_setting(self):
         logging.info("Set lid to ordered value")
         level = int(R.get("lid_setuplevel") or -1)
         while level > 0:

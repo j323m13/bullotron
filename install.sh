@@ -9,7 +9,7 @@ sudo systemctl start redis-server
 sudo systemctl enable redis-server
 
 #install python libs
-pip3 install -r requirements.txt
+sudo pip3 install -r requirements.txt
 
 sudo mkdir /opt/bullotron
 sudo cp ./*.py /opt/bullotron/

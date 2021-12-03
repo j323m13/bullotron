@@ -20,3 +20,4 @@ sudo systemctl daemon-reload
 sudo systemctl enable redis-server && sudo systemctl start redis-server
 sudo systemctl enable bullotron-hw && sudo systemctl start bullotron-hw
 sudo systemctl enable bullotron-display && sudo systemctl start bullotron-display
+sudo systemctl enable pigpiod && sudo systemctl start pigpiod

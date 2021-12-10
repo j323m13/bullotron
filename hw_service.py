@@ -63,7 +63,7 @@ class InvertedServo(PWMOutputDevice):
             else:
                 self.target -=1
             self.set(self.target)
-            sleep(0.02)
+            sleep(0.01)
 
 SERVO = InvertedServo(pin.SERVO,active_high=False,frequency=50)
 
@@ -76,20 +76,34 @@ class BullotronHW(StateMachine):
     open_full = State('Fully opening')
     open_setting =State('Opening to dynamic angle') 
 
-    init = init_hw.to(closed)
+    init = init_hw.to(init_hw)
     close = sens_fill.to(closed) | open_to_blow.to(closed) | open_full.to(closed) | open_setting.to(closed) | blowing.to(closed)
-    sense = closed.to(sens_fill)
+    sense = closed.to(sens_fill) | init_hw.to(sens_fill)
     blow_cycle = closed.to(open_to_blow)
     blow = open_to_blow.to(blowing) 
     fill = closed.to(open_full)
     set_angle = closed.to(open_setting)
 
-    def on_init(self):
+    def on_enter_init_hw(self):
         logging.info("Initialize Hardware")
         logging.debug("shut off fan")
         FAN.off()
         logging.debug("close lid")
         SERVO.set(int(R.get("lid_closed") or 0))
+        self.sense()
+
+    def on_enter_sens_fill(self):
+        logging.info("Sensing Level")
+        logging.debug("opening")      
+        angle = int(R.get("lid_closed") or 0)
+        stop = int(R.get("blowlevel") or 800)
+        while (LEVELSENS.is_pressed and (angle < stop)):
+            angle=angle+1
+            SERVO.fade(angle)
+            
+        R.set("liquidlevel",angle)
+        logging.info("sensed level:  " + str(angle))
+        self.close()
 
     def on_enter_closed(self):
         logging.info("closed")

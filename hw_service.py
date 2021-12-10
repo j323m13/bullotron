@@ -63,7 +63,7 @@ class InvertedServo(PWMOutputDevice):
             else:
                 self.target -=1
             self.set(self.target)
-            sleep(0.02)
+            sleep(0.01)
 
 SERVO = InvertedServo(pin.SERVO,active_high=False,frequency=50)
 

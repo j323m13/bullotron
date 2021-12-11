@@ -154,24 +154,55 @@ def display_private_external_ip():
     
 
 # display fan speed
-def display_fan_speed(speed):
+def display_fan_speed(key):
     lcd_line_1 = "Fan speed: \n"
-    lcd_line_2 = str(speed)+"%"
+    fan_speed = redis_get(key)
+    lcd_line_2 = str(fan_speed)+"%"
     lcd.message = lcd_line_1 + lcd_line_2
     sleep(1)
 
 # display soap level
-def display_soap_level(level):
+def display_soap_level():
     lcd_line_1 = "Soap level: \n"
-    lcd_line_2 = str(level)+"%"
+    lcd_line_2 = str(R.get(level_soap))+"%"
     lcd.message = lcd_line_1 + lcd_line_2
     sleep(1)
 
+# shutdown mi boi
+def shutdown_bullotron(key,value):
+    if(value == int(redis_get(key))):
+        answer_shutdown_txt = "no"
+    else:
+        answer_shutdown_txt = "yes"
+    lcd_line_1 = "shutdown?\n"
+    lcd_line_2 = str(answer_shutdown_txt)
+    lcd.message = lcd_line_1 + lcd_line_2
+    sleep(1)
+    if(answer_shutdown_txt == "yes"):
+        lcd.clear()
+        lcd_line_1 = "Goodbye /n"
+        lcd_line_2 = "me go sleep"
+        lcd.message = lcd_line_1 + lcd_line_2
+        sleep(1)
+        shutdown_order = "sudo shutdown now"
+        lcd.clear()
+        run_cmd(shutdown_order)
+    
+
 def redis_get(key):
     #TODO
+    print(R.get(str(key)))
+    return R.get(str(key))
+    
+
 
 def redis_set(key,value):
     #TODO
+    print("key: "+str(key))
+    print("value: "+str(value))
+    R.set(str(key),str(value))
+    print(R.get(str(key)))
+    print("update value: "+str(value))
 
 # wipe LCD screen before we start
 lcd.clear()
@@ -181,14 +212,21 @@ lcd.clear()
 sleep(2)
 interface = find_interface()
 ip_address = parse_ip() 
-view = 2
-speed = 50
-level = 50
+view = 5
+limit_view = 5
+#debug
+level_soap = "level_soap"
+R.set(str(level_soap),100)
+fan_speed = R.get("fan_speed")
+level_soap = R.get("level_soap")
+shutdown="0"
+
+
 
 
 while True:
     if button1.value:
-        if view ==4:
+        if view ==limit_view:
             view =1
         else:
             view = view+1
@@ -201,19 +239,31 @@ while True:
             value = 0
         else:
             value = value + 10
-        print("update value: "+str(value))
+            redis_set(key,value)
+            redis_get(key)
+        
         lcd.clear()
         sleep(.25)
 
     if view==1:
+        print("cpu and temp view")
         display_date_time_cpu_temp_load()
     if view==2:
+        print("ip view mi boi")
         display_private_external_ip()
     if view==3:
-        R.get()
-        display_soap_level(level)
+        print("soapy view")
+        key="soap_level"
+        display_soap_level()
     if view==4:
-        display_fan_speed(value)
+        print("viiiiuuuuuuuuuuuuuuuuuuuuuuuuuuu")
+        key="fan_speed"
+        display_fan_speed(key)
+    if view==5:
+        key="shutdown"
+        print("Shutdown")
+        value = 0
+        shutdown_bullotron(key,value)
 
     sleep(.25)
 

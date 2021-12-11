@@ -180,10 +180,10 @@ def shutdown_bullotron(key,value):
     sleep(1)
     if(answer_shutdown_txt == "yes"):
         lcd.clear()
-        lcd_line_1 = "Goodbye /n"
+        lcd_line_1 = "Goodbye \n"
         lcd_line_2 = "me go sleep"
         lcd.message = lcd_line_1 + lcd_line_2
-        sleep(1)
+        sleep(3)
         shutdown_order = "sudo shutdown now"
         lcd.clear()
         run_cmd(shutdown_order)
@@ -219,7 +219,7 @@ level_soap = "level_soap"
 R.set(str(level_soap),100)
 fan_speed = R.get("fan_speed")
 level_soap = R.get("level_soap")
-shutdown="0"
+R.set("shutdown","0")
 
 
 

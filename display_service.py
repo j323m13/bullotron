@@ -31,6 +31,7 @@ import redis
 
 # Own modules
 import pindefinitions as pin #Pins on the PCB
+import redis_key_names as rediskey
 
 __author__ = 'j323m13'
 __copyright__ = 'Copyright 2021, Bullotron'
@@ -131,7 +132,7 @@ def display_date_time_cpu_temp_load():
     
     # combine both lines into one update to the display
     lcd.message = lcd_line_1 + lcd_line_2
-    sleep(1)
+    sleep(0.25)
 
 #get external IP
 def get_external_IP(url):
@@ -150,23 +151,31 @@ def display_private_external_ip():
     # combine both lines into one update to the display
     lcd.message = lcd_line_1 + lcd_line_2
     
-    sleep(1)
+    sleep(0.25)
     
 
 # display fan speed
 def display_fan_speed(key):
     lcd_line_1 = "Fan speed: \n"
-    fan_speed = redis_get(key)
+    fan_speed = redis_get(key).decode('utf-8')
     lcd_line_2 = str(fan_speed)+"%"
     lcd.message = lcd_line_1 + lcd_line_2
-    sleep(1)
+    sleep(0.25)
+
+# set blow time
+def display_fan_blow_time(key):
+    lcd_line_1 = "blow time: \n"
+    blow_time = redis_get(key).decode('utf-8')
+    lcd_line_2 = str(blow_time)+" sec."
+    lcd.message = lcd_line_1 + lcd_line_2
+    sleep(0.25)
 
 # display soap level
-def display_soap_level():
+def display_soap_level(key):
     lcd_line_1 = "Soap level: \n"
-    lcd_line_2 = str(R.get(level_soap))+"%"
+    lcd_line_2 = str(R.get(key).decode('utf-8'))+"%"
     lcd.message = lcd_line_1 + lcd_line_2
-    sleep(1)
+    sleep(0.25)
 
 # shutdown mi boi
 def shutdown_bullotron(key,value):
@@ -177,7 +186,7 @@ def shutdown_bullotron(key,value):
     lcd_line_1 = "shutdown?\n"
     lcd_line_2 = str(answer_shutdown_txt)
     lcd.message = lcd_line_1 + lcd_line_2
-    sleep(1)
+    sleep(0.25)
     if(answer_shutdown_txt == "yes"):
         lcd.clear()
         lcd_line_1 = "Goodbye \n"
@@ -187,17 +196,22 @@ def shutdown_bullotron(key,value):
         shutdown_order = "sudo shutdown now"
         lcd.clear()
         run_cmd(shutdown_order)
-    
+
+def get_lid_open(key):
+    print(str(key))
+    lcd_line_1 = "lid's opned for \n"
+    lid_open_time = R.get(key).decode('utf-8')
+    lcd_line_2 = str(lid_open_time)+" sec."
+    print(lcd_line_2)
+    lcd.message = lcd_line_1 + lcd_line_2
+    sleep(0.25)
 
 def redis_get(key):
-    #TODO
     print(R.get(str(key)))
     return R.get(str(key))
     
 
-
 def redis_set(key,value):
-    #TODO
     print("key: "+str(key))
     print("value: "+str(value))
     R.set(str(key),str(value))
@@ -212,14 +226,16 @@ lcd.clear()
 sleep(2)
 interface = find_interface()
 ip_address = parse_ip() 
-view = 5
-limit_view = 5
-#debug
-level_soap = "level_soap"
-R.set(str(level_soap),100)
-fan_speed = R.get("fan_speed")
-level_soap = R.get("level_soap")
-R.set("shutdown","0")
+#start view
+view = 6
+limit_view = 7
+#debug: set value to test system without hardware
+R.set(rediskey.liquid_level,"100")
+fan_speed = R.get(rediskey.blowforce)
+R.set(rediskey.blowtime,"5")
+fan_blow_time = R.get(rediskey.blowtime)
+R.set(rediskey.lid_open,"5")
+R.set(rediskey.shutdown,"0")
 
 
 
@@ -235,12 +251,17 @@ while True:
         lcd.clear()
         sleep(.25)
     if button2.value:
-        if value == 100:
-            value = 0
+        if(view==1 or view ==2 or view ==3):
+            pass
         else:
-            value = value + 10
-            redis_set(key,value)
-            redis_get(key)
+            if value == 100:
+                value = 0
+                redis_set(key,value)
+                redis_get(key)
+            else:
+                value = value + 10
+                redis_set(key,value)
+                redis_get(key)
         
         lcd.clear()
         sleep(.25)
@@ -253,14 +274,21 @@ while True:
         display_private_external_ip()
     if view==3:
         print("soapy view")
-        key="soap_level"
-        display_soap_level()
+        display_soap_level(rediskey.liquid_level)
     if view==4:
         print("viiiiuuuuuuuuuuuuuuuuuuuuuuuuuuu")
-        key="fan_speed"
+        key=fan_speed
         display_fan_speed(key)
     if view==5:
-        key="shutdown"
+        print("viuuuuu how long?")
+        key=fan_blow_time
+        display_fan_blow_time(key)
+    if view==6:
+        print("lid open time?")
+        key=rediskey.lid_open
+        get_lid_open(key)
+    if view==7:
+        key=rediskey.shutdown
         print("Shutdown")
         value = 0
         shutdown_bullotron(key,value)

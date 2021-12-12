@@ -84,6 +84,7 @@ def display_welcome():
     lcd_line_1 = "Welcome. I'am \n"
     lcd_line_2 = "Bullotron :-)"
     lcd.message = lcd_line_1 + lcd_line_2 
+    sleep(0.25)
 
 # looking for an active Ethernet or WiFi device
 def find_interface():
@@ -233,7 +234,7 @@ lcd.clear()
 interface = find_interface()
 ip_address = parse_ip() 
 #start view
-view = 0
+view = 4
 limit_view = 7
 #debug: set value to test system without hardware
 R.set(rediskey.liquid_level,"100")
@@ -262,18 +263,21 @@ while True:
             if(view==4):
                 value_end = 1000
                 increment = 100
+                value = redis_get(key)
             if(view==5 or view==6):
                 value_end = 15
                 increment = 5
+                value = redis_get(key)
             else:
                 value_end = 100
                 increment = 10
-            if value == value_end:
+                value = redis_get(key)
+            if int(value) == value_end:
                 value = 0
                 redis_set(key,value)
                 #redis_get(key)
             else:
-                value = value + increment
+                value = int(value) + increment
                 redis_set(key,value)
                 #redis_get(key)
         

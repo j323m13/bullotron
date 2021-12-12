@@ -234,7 +234,7 @@ lcd.clear()
 interface = find_interface()
 ip_address = parse_ip() 
 #start view
-view = 4
+view = 0
 limit_view = 7
 #debug: set value to test system without hardware
 R.set(rediskey.liquid_level,"100")

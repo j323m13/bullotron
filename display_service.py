@@ -77,9 +77,13 @@ ip_address = ""
 url = ""
 externalIP_tmp = ""
 externalIP = ""
-view = 0
 value = 0
 
+# welcome message
+def display_welcome():
+    lcd_line_1 = "Welcome. I'am \n"
+    lcd_line_2 = "Bullotron :-)"
+    lcd.message = lcd_line_1 + lcd_line_2 
 
 # looking for an active Ethernet or WiFi device
 def find_interface():
@@ -157,7 +161,8 @@ def display_private_external_ip():
 # display fan speed
 def display_fan_speed(key):
     lcd_line_1 = "Fan speed: \n"
-    fan_speed = redis_get(key).decode('utf-8')
+    fan_speed_redis = redis_get(key).decode('utf-8')
+    fan_speed = int(fan_speed_redis)
     lcd_line_2 = str(fan_speed)+"%"
     lcd.message = lcd_line_1 + lcd_line_2
     sleep(0.25)
@@ -173,7 +178,9 @@ def display_fan_blow_time(key):
 # display soap level
 def display_soap_level(key):
     lcd_line_1 = "Soap level: \n"
-    lcd_line_2 = str(R.get(key).decode('utf-8'))+"%"
+    soap_level_tmp = R.get(key).decode('utf-8')
+    soap_level = int(soap_level_tmp)
+    lcd_line_2 = str(soap_level)+"%"
     lcd.message = lcd_line_1 + lcd_line_2
     sleep(0.25)
 
@@ -199,7 +206,7 @@ def shutdown_bullotron(key,value):
 
 def get_lid_open(key):
     print(str(key))
-    lcd_line_1 = "lid's opned for \n"
+    lcd_line_1 = "lid's opened for \n"
     lid_open_time = R.get(key).decode('utf-8')
     lcd_line_2 = str(lid_open_time)+" sec."
     print(lcd_line_2)
@@ -223,17 +230,15 @@ lcd.clear()
 
 #set default values
 #before we start the main loop - detect active network device and ip address
-sleep(2)
 interface = find_interface()
 ip_address = parse_ip() 
 #start view
-view = 6
+view = 0
 limit_view = 7
 #debug: set value to test system without hardware
 R.set(rediskey.liquid_level,"100")
-fan_speed = R.get(rediskey.blowforce)
+R.set(rediskey.blowforce,"50")
 R.set(rediskey.blowtime,"5")
-fan_blow_time = R.get(rediskey.blowtime)
 R.set(rediskey.lid_open,"5")
 R.set(rediskey.shutdown,"0")
 
@@ -254,34 +259,46 @@ while True:
         if(view==1 or view ==2 or view ==3):
             pass
         else:
-            if value == 100:
+            if(view==4):
+                value_end = 1000
+                increment = 100
+            if(view==5 or view==6):
+                value_end = 15
+                increment = 5
+            else:
+                value_end = 100
+                increment = 10
+            if value == value_end:
                 value = 0
                 redis_set(key,value)
-                redis_get(key)
+                #redis_get(key)
             else:
-                value = value + 10
+                value = value + increment
                 redis_set(key,value)
-                redis_get(key)
+                #redis_get(key)
         
         lcd.clear()
         sleep(.25)
 
+    if view==0:
+        print("Welcome view")
+        display_welcome()
     if view==1:
         print("cpu and temp view")
         display_date_time_cpu_temp_load()
     if view==2:
-        print("ip view mi boi")
+        print("ips view")
         display_private_external_ip()
     if view==3:
         print("soapy view")
         display_soap_level(rediskey.liquid_level)
     if view==4:
-        print("viiiiuuuuuuuuuuuuuuuuuuuuuuuuuuu")
-        key=fan_speed
+        print("blow force view")
+        key=rediskey.blowforce
         display_fan_speed(key)
     if view==5:
-        print("viuuuuu how long?")
-        key=fan_blow_time
+        print("blow time?")
+        key=rediskey.blowtime
         display_fan_blow_time(key)
     if view==6:
         print("lid open time?")

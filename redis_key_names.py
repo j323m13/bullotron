@@ -1,0 +1,11 @@
+#redis key dictionary
+lid_closed = "lid_closed"
+lid_blowlevel = "lid_blowlevel"
+lid_open = "lid_open"
+blowforce = "blowforce"
+blowtime = "blowtime"
+lid_setuplevel = "lid_setuplevel"
+lid_fill = "lid_fill"
+liquid_level = "liquid_level"
+liquid_level_warn = "liquid_level_warn"
+shutdown = "shutdown"

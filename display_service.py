@@ -163,8 +163,8 @@ def display_private_external_ip():
 def display_fan_speed(key):
     lcd_line_1 = "Fan speed: \n"
     fan_speed_redis = redis_get(key).decode('utf-8')
-    fan_speed = float(fan_speed_redis)
-    lcd_line_2 = float(fan_speed)+"%"
+    fan_speed_redis_tmp = float(fan_speed_redis)*float(100)
+    lcd_line_2 = str(int(fan_speed_redis_tmp))+" %"
     lcd.message = lcd_line_1 + lcd_line_2
     sleep(0.25)
 
@@ -181,7 +181,7 @@ def display_soap_level(key):
     lcd_line_1 = "Soap level: \n"
     soap_level_tmp = R.get(key).decode('utf-8')
     soap_level = int(soap_level_tmp)
-    lcd_line_2 = str(soap_level)+"%"
+    lcd_line_2 = str(soap_level)
     lcd.message = lcd_line_1 + lcd_line_2
     sleep(0.25)
 
@@ -234,22 +234,15 @@ lcd.clear()
 interface = find_interface()
 ip_address = parse_ip() 
 #start view
-view = 0
+view = 4
 limit_view = 7
 #debug: set value to test system without hardware
-<<<<<<< HEAD
-R.set(rediskey.liquid_level,"100")
-R.set(rediskey.blowforce,"0.2")
-R.set(rediskey.blowtime,"5")
-R.set(rediskey.lid_open,"15")
-R.set(rediskey.shutdown,"0")
-=======
 #R.set(rediskey.liquid_level,"100")
-#R.set(rediskey.blowforce,"0.50")
+R.set(rediskey.blowforce,"0.50")
 #R.set(rediskey.blowtime,"5")
 #R.set(rediskey.lid_open,"5")
 #R.set(rediskey.shutdown,"0")
->>>>>>> 2e09c8a6a22c6b91a200b8a892646070487f1422
+
 
 
 
@@ -269,28 +262,34 @@ while True:
             pass
         else:
             if(view==4):
-                value_end = 1
+                value_end = 1.0
                 increment = 0.1
                 value = redis_get(key)
             if(view==5 or view==6):
                 value_end = 15
                 increment = 5
                 value = redis_get(key)
-            else:
+            if(view==7):
                 value_end = 100
                 increment = 10
                 value = redis_get(key)
-            if int(value) == value_end:
+            if (value == value_end or float(value) > value_end-increment):
                 value = 0
                 redis_set(key,value)
                 #redis_get(key)
+            if(view==4):
+                print("increment "+str(increment))
+                value = float(value) + increment
+                redis_set(key,value)
+                #redis_get(key)
             else:
+                print("increment "+str(increment))
                 value = int(value) + increment
                 redis_set(key,value)
                 #redis_get(key)
         
         lcd.clear()
-        sleep(.25)
+        sleep(.1)
 
     if view==0:
         print("Welcome view")

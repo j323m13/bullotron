@@ -39,11 +39,11 @@ __license__ = 'Apache 2.0'
 __version__ = '0.1'
 __maintainer__ = 'j323m13'
 __email__ = 'jeremie.equey@students.ffhs.ch'
-__status__ = 'Draft'
+__status__ = 'prod'
 
-# Global Elements
+## Global Elements
 R = redis.Redis()
-BTN1 = Button(pin.SW1)
+
 # Modify this if you have a different sized character LCD
 lcd_columns = 16
 lcd_rows = 2
@@ -59,13 +59,7 @@ lcd_d7 = digitalio.DigitalInOut(board.D24)
 
 
 button1 = digitalio.DigitalInOut(board.D16)
-#button1.direction = digitalio.Direction.INPUT
-#button1.pull = digitalio.Pull.UP
-
 button2 = digitalio.DigitalInOut(board.D20)
-#button2.direction = digitalio.Direction.INPUT
-#button2.pull = digitalio.Pull.UP
-
 
 # Initialise the lcd class
 lcd = characterlcd.Character_LCD_Mono(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6,
@@ -234,17 +228,14 @@ lcd.clear()
 interface = find_interface()
 ip_address = parse_ip() 
 #start view
-view = 4
+view = 0
 limit_view = 7
 #debug: set value to test system without hardware
 #R.set(rediskey.liquid_level,"100")
-R.set(rediskey.blowforce,"0.50")
+#R.set(rediskey.blowforce,"0.50")
 #R.set(rediskey.blowtime,"5")
 #R.set(rediskey.lid_open,"5")
 #R.set(rediskey.shutdown,"0")
-
-
-
 
 
 while True:

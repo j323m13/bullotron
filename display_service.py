@@ -163,8 +163,8 @@ def display_private_external_ip():
 def display_fan_speed(key):
     lcd_line_1 = "Fan speed: \n"
     fan_speed_redis = redis_get(key).decode('utf-8')
-    fan_speed = int(fan_speed_redis)
-    lcd_line_2 = str(fan_speed)+"%"
+    fan_speed = float(fan_speed_redis)
+    lcd_line_2 = float(fan_speed)+"%"
     lcd.message = lcd_line_1 + lcd_line_2
     sleep(0.25)
 
@@ -237,11 +237,19 @@ ip_address = parse_ip()
 view = 0
 limit_view = 7
 #debug: set value to test system without hardware
+<<<<<<< HEAD
+R.set(rediskey.liquid_level,"100")
+R.set(rediskey.blowforce,"0.2")
+R.set(rediskey.blowtime,"5")
+R.set(rediskey.lid_open,"15")
+R.set(rediskey.shutdown,"0")
+=======
 #R.set(rediskey.liquid_level,"100")
 #R.set(rediskey.blowforce,"0.50")
 #R.set(rediskey.blowtime,"5")
 #R.set(rediskey.lid_open,"5")
 #R.set(rediskey.shutdown,"0")
+>>>>>>> 2e09c8a6a22c6b91a200b8a892646070487f1422
 
 
 
@@ -261,8 +269,8 @@ while True:
             pass
         else:
             if(view==4):
-                value_end = 1000
-                increment = 100
+                value_end = 1
+                increment = 0.1
                 value = redis_get(key)
             if(view==5 or view==6):
                 value_end = 15

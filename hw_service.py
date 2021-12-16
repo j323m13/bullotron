@@ -101,7 +101,7 @@ class BullotronHW(StateMachine):
             angle=angle+1
             SERVO.fade(angle)
             
-        R.set("liquidlevel",angle)
+        R.set("liquid_level",angle)
         logging.info("sensed level:  " + str(angle))
         self.close()
 

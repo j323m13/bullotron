@@ -63,7 +63,7 @@ class InvertedServo(PWMOutputDevice):
             else:
                 self.target -=1
             self.set(self.target)
-            sleep(0.01)
+            sleep(0.003)
 
 SERVO = InvertedServo(pin.SERVO,active_high=False,frequency=50)
 
@@ -146,7 +146,7 @@ class BullotronHW(StateMachine):
 
     def on_enter_blowing(self):
         logging.info("Blowing")
-        logging.debug("Set fan to " + (R.get("blowforce") or "1"))
+        logging.debug("Set fan to " + str((R.get("blowforce") or "1")))
         FAN.value = (float(R.get("blowforce") or 1))
         logging.debug("Wait for")
         sleep(int(R.get("blowtime") or 5))

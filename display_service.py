@@ -237,11 +237,19 @@ ip_address = parse_ip()
 view = 0
 limit_view = 7
 #debug: set value to test system without hardware
+<<<<<<< HEAD
 R.set(rediskey.liquid_level,"100")
 R.set(rediskey.blowforce,"0.2")
 R.set(rediskey.blowtime,"5")
 R.set(rediskey.lid_open,"15")
 R.set(rediskey.shutdown,"0")
+=======
+#R.set(rediskey.liquid_level,"100")
+#R.set(rediskey.blowforce,"0.50")
+#R.set(rediskey.blowtime,"5")
+#R.set(rediskey.lid_open,"5")
+#R.set(rediskey.shutdown,"0")
+>>>>>>> 2e09c8a6a22c6b91a200b8a892646070487f1422
 
 
 

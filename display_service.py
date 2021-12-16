@@ -254,7 +254,8 @@ while True:
         else:
             if(view==4):
                 value_end = 1.0
-                increment = 0.1
+                #trick to get a displayable %
+                increment = 0.1001
                 value = redis_get(key)
             if(view==5 or view==6):
                 value_end = 15

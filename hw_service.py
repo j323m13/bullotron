@@ -26,6 +26,7 @@ import redis
 
 # Own modules
 import pindefinitions as pin #Pins on the PCB
+from notification import notify
 
 __author__ = 'MajorTwip'
 __copyright__ = 'Copyright 2021, Bullotron'
@@ -44,6 +45,9 @@ BTN = Button(pin.SW1,False)
 RC = Button(pin.IN1)
 RC_EN = DigitalOutputDevice(pin.OUT2,False)
 LEVELSENS = Button(pin.IN2)
+
+
+
 
 class InvertedServo(PWMOutputDevice):
     target = 0
@@ -68,6 +72,8 @@ class InvertedServo(PWMOutputDevice):
 SERVO = InvertedServo(pin.SERVO,active_high=False,frequency=50)
 
 class BullotronHW(StateMachine):
+    sensafter = 0
+
     init_hw = State('InitHW', initial=True)
     sens_fill = State('Sensing Level')
     closed = State('Lid closing')
@@ -103,10 +109,19 @@ class BullotronHW(StateMachine):
             
         R.set("liquid_level",angle)
         logging.info("sensed level:  " + str(angle))
+        if angle < int(R.get("liquid_level_warn") or 101):
+            notify()
+        
+        self.sensafter = 5
         self.close()
 
     def on_enter_closed(self):
         logging.info("closed")
+        if (self.sensafter < 0):
+            self.sense()
+        else:
+            self.sensafter -= 1
+
         logging.debug("enable RC-receiver")
         RC_EN.on()
         logging.debug("waiting for: RC, Buttonpress for start, order to fill, setup")
